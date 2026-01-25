@@ -50,20 +50,20 @@ function handleFiles(files) {
         const file = files[0];
         if (file.type.startsWith('image/')) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
+            reader.onload = function (e) {
+                // Do not set imagePreview.src here, it's an ArrayBuffer
                 fileName.textContent = file.name;
                 previewContainer.classList.remove('hidden');
                 document.querySelector('.upload-label').classList.add('hidden');
                 processBtn.disabled = false;
-                
+
                 window.uploadedFile = file;
-                window.uploadedFileBytes = new Uint8Array(e.target.result); 
+                window.uploadedFileBytes = new Uint8Array(e.target.result);
             }
-            reader.readAsArrayBuffer(file); 
-            
+            reader.readAsArrayBuffer(file);
+
             const urlReader = new FileReader();
-            urlReader.onload = function(e) {
+            urlReader.onload = function (e) {
                 imagePreview.src = e.target.result;
             }
             urlReader.readAsDataURL(file);
@@ -87,14 +87,14 @@ processBtn.addEventListener('click', async () => {
     processBtn.disabled = true;
 
     try {
-        
-        await new Promise(r => setTimeout(r, 100)); 
-        
+
+        await new Promise(r => setTimeout(r, 100));
+
         const pyscriptBtn = document.getElementById('run-python-logic');
         if (pyscriptBtn) {
             pyscriptBtn.click();
         } else {
-            
+
             const event = new CustomEvent('process-trigger');
             window.dispatchEvent(event);
         }
@@ -104,7 +104,7 @@ processBtn.addEventListener('click', async () => {
     }
 });
 
-window.processingComplete = function(downloadUrl, filename) {
+window.processingComplete = function (downloadUrl, filename) {
     statusArea.classList.add('hidden');
     resultsArea.classList.remove('hidden');
     processBtn.disabled = false;
