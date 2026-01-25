@@ -13,7 +13,7 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
-    background-image: 
+    background-image:
         radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
         radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 20%);
     min-height: 100vh;
@@ -45,7 +45,9 @@ h1 {
     margin: 0 0 0.5rem 0;
     background: linear-gradient(to right, #818cf8, #c084fc);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 p {
@@ -64,7 +66,8 @@ p {
     background: rgba(255, 255, 255, 0.02);
 }
 
-.upload-section:hover, .upload-section.dragover {
+.upload-section:hover,
+.upload-section.dragover {
     border-color: var(--accent-color);
     background: rgba(99, 102, 241, 0.05);
 }
@@ -115,7 +118,8 @@ label {
     font-weight: 500;
 }
 
-select, input {
+select,
+input {
     background: rgba(15, 23, 42, 0.6);
     border: 1px solid var(--glass-border);
     color: var(--text-color);
@@ -126,7 +130,8 @@ select, input {
     transition: border-color 0.2s;
 }
 
-select:focus, input:focus {
+select:focus,
+input:focus {
     border-color: var(--accent-color);
 }
 
@@ -167,8 +172,13 @@ select:focus, input:focus {
 }
 
 @keyframes rotation {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 #status-area {
