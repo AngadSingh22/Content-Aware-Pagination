@@ -3,7 +3,7 @@ const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-upload');
 const previewContainer = document.getElementById('preview-container');
 const imagePreview = document.getElementById('image-preview');
-const fileName = document.getElementById('file-name');
+
 const processBtn = document.getElementById('process-btn');
 const formatSelect = document.getElementById('format-select');
 const customSizeGroup = document.getElementById('custom-size-group');
@@ -52,7 +52,7 @@ function handleFiles(files) {
             const reader = new FileReader();
             reader.onload = function (e) {
                 // Do not set imagePreview.src here, it's an ArrayBuffer
-                fileName.textContent = file.name;
+                // Do not set imagePreview.src here, it's an ArrayBuffer
                 previewContainer.classList.remove('hidden');
                 document.querySelector('.upload-label').classList.add('hidden');
                 processBtn.disabled = false;
