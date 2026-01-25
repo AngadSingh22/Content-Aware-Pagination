@@ -1,12 +1,12 @@
 import click
 import os
 import sys
-from .core import compute_ink_density, find_optimal_cuts_dp
-from .io import load_image, save_pdf_from_crops
+from .core import compute_ink_density, find_optimal_cuts_dp, CutMode
+from .io import load_image, save_pdf_from_crops, RenderMode
 from PIL import Image
 import numpy as np
 
-# Standard sizes in mm
+
 PAPER_SIZES = {
     "A4": (210, 297),
     "A3": (297, 420),
@@ -15,89 +15,126 @@ PAPER_SIZES = {
 
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True))
-@click.option("--output", "-o", default=None, help="Output PDF path. Defaults to input_paginated.pdf")
+@click.option("--output", "-o", default=None, help="Output path (PDF or directory for images)")
+@click.option("--output-format", default="pdf", type=click.Choice(["pdf", "images"]),
+              help="Output format: pdf (single file) or images (multiple PNG files)")
 @click.option("--format", "-f", default="A4", type=click.Choice(list(PAPER_SIZES.keys()) + ["CUSTOM"]), help="Page format (A4, A3, B5)")
 @click.option("--dpi", "-d", default=300, help="DPI for physical size calculation")
 @click.option("--window-frac", default=0.04, help="Search window fraction of page height")
 @click.option("--min-gap", default=12, help="Minimum gap rows to consider safe")
-def main(input_path, output, format, dpi, window_frac, min_gap):
-    """
-    Content-Aware Pagination Tool.
-    
-    Splits a long image into pages avoiding text cuts.
-    """
+@click.option("--cut-mode", default="whitespace", type=click.Choice(["whitespace", "fixed_height_snap"]),
+              help="Cut strategy: whitespace (flexible) or fixed_height_snap (deterministic)")
+@click.option("--render-mode", default="variable_size", type=click.Choice(["variable_size", "fixed_size_with_padding"]),
+              help="Render strategy: variable_size or fixed_size_with_padding")
+@click.option("--snap-px", default=40, help="Snap neighborhood radius in pixels for fixed_height_snap mode")
+@click.option("--unsafe-window", default=2, help="Window radius for unsafe cut detection")
+@click.option("--unsafe-threshold", default=0.3, help="Ink threshold for unsafe cut detection")
+def main(input_path, output, output_format, format, dpi, window_frac, min_gap, cut_mode, render_mode, snap_px, unsafe_window, unsafe_threshold):
+
     if output is None:
         base, _ = os.path.splitext(input_path)
-        output = f"{base}_paginated.pdf"
-        
+        if output_format == "pdf":
+            output = f"{base}_paginated.pdf"
+        else:
+            output = f"{base}_pages"
+
     click.echo(f"Processing {input_path}...")
-    
-    # 1. Load Image
+
+
     try:
-        # Load as numpy for processing, but keep reference for cropping if needed?
-        # Our io.load_image returns numpy array.
-        # But we need PIL image for cropping efficiently or just slice the numpy array.
-        # Let's check io.py: load_image returns np.array.
-        # To crop, we can slice numpy array.
+
+
+
+
+
         img_array = load_image(input_path)
     except Exception as e:
         click.echo(f"Error loading image: {e}", err=True)
         sys.exit(1)
-        
+
     height, width, _ = img_array.shape if len(img_array.shape) == 3 else (img_array.shape[0], img_array.shape[1], 1)
-    
-    # 2. Determine Target Height
+
+
     if format in PAPER_SIZES:
         w_mm, h_mm = PAPER_SIZES[format]
-        # We need to map width of image to physical width or just use height ratio?
-        # Usually, we want the image width to fit on the page width.
-        # scaling_factor = image_width_px / (page_width_mm * dpi / 25.4)
-        # But here we want to slice the image to fit onto pages.
-        # If we print at 1:1, the pixel height of the page is:
-        # h_px = h_mm / 25.4 * dpi
+
+
+
+
+
+
         target_height_px = int(h_mm / 25.4 * dpi)
-        
-        # Adjust if image resolution implies different size?
-        # The user says "same high fidelity", so 1:1 mapping.
-        # We just cut chunks of target_height_px.
+
+
+
+
     else:
-        # Custom... just assume A4 for now or ask user for height
+
         target_height_px = int(297 / 25.4 * dpi)
-        
+
     click.echo(f"Image Size: {width}x{height}")
     click.echo(f"Target Page Height: {target_height_px} px (@ {dpi} DPI)")
 
-    # 3. Compute Ink Density
+
     click.echo("Analyzing ink density...")
     ink_profile = compute_ink_density(img_array)
-    
-    # 4. Find Cuts (DP)
+
+
+    cut_mode_enum = CutMode.WHITESPACE if cut_mode == "whitespace" else CutMode.FIXED_HEIGHT_SNAP
+    render_mode_enum = RenderMode.VARIABLE_SIZE if render_mode == "variable_size" else RenderMode.FIXED_SIZE_WITH_PADDING
+
+    click.echo(f"Cut Mode: {cut_mode}, Render Mode: {render_mode}")
+
+
     click.echo("Finding optimal cuts (DP)...")
-    cuts = find_optimal_cuts_dp(ink_profile, target_height_px, 
-                                window_frac=window_frac, 
-                                min_gap_rows=min_gap)
-                                
+    cuts = find_optimal_cuts_dp(ink_profile, target_height_px,
+                                window_frac=window_frac,
+                                min_gap_rows=min_gap,
+                                cut_mode=cut_mode_enum,
+                                snap_px=snap_px,
+                                unsafe_window_radius=unsafe_window,
+                                unsafe_ink_threshold=unsafe_threshold)
+
     click.echo(f"Found {len(cuts)-1} pages.")
-    
-    # 5. Crop and Save
-    files_to_save = []
-    
-    # load PIL image for clean cropping (or reuse numpy)
-    # Re-opening as PIL to preserve metadata/quality if we were careful, 
-    # but numpy conversion is already lossy if we aren't careful.
-    # Actually io.load_image returned numpy. Let's just use numpy slices.
-    
+
+
+    crops = []
+
     for i in range(len(cuts) - 1):
         start = cuts[i]
         end = cuts[i+1]
-        
-        # Simple slice
         page_crop = img_array[start:end, :]
-        files_to_save.append(page_crop)
-        
-    click.echo(f"Saving to {output}...")
-    save_pdf_from_crops(files_to_save, output, dpi=dpi)
-    click.echo("Done!")
+        crops.append(page_crop)
+
+
+    if output_format == "pdf":
+        click.echo(f"Saving to {output}...")
+        save_pdf_from_crops(crops, output, dpi=dpi,
+                            render_mode=render_mode_enum,
+                            target_height_px=target_height_px)
+        click.echo("Done!")
+    else:
+
+        os.makedirs(output, exist_ok=True)
+        click.echo(f"Saving {len(crops)} images to {output}/...")
+
+        for i, crop in enumerate(crops):
+
+            if isinstance(crop, np.ndarray):
+                crop_img = Image.fromarray(crop)
+            else:
+                crop_img = crop
+
+
+            if render_mode_enum == RenderMode.FIXED_SIZE_WITH_PADDING and target_height_px is not None:
+                from .io import _pad_to_target_height
+                crop_img = _pad_to_target_height(crop_img, target_height_px)
+
+
+            output_path = os.path.join(output, f"page_{i+1:03d}.png")
+            crop_img.save(output_path, "PNG")
+
+        click.echo(f"Done! Saved {len(crops)} images to {output}/")
 
 if __name__ == "__main__":
     main()
