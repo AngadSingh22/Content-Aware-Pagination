@@ -6,7 +6,7 @@ It’s completely content-aware, which is a fancy way of saying "it looks for th
 
 
 ## Try It Out (Please)
- [Launch the Web App](https://ahuja.github.io/Content_Aware_Pagination/)
+ [Launch the Web App](https://angadsingh22.github.io/Content-Aware-Pagination/)
 
 Prefer green text(or blue) on a black background? I respect that. You can run this locally too.
 
