@@ -1,6 +1,0 @@
-opencv-python>=4.0.0
-numpy
-Pillow>=9.0.0
-reportlab>=3.0.0
-click
-streamlit
