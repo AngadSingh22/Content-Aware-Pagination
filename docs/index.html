@@ -3,54 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content Aware Pagination</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Content-Aware Pagination</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <link rel="stylesheet" href="./assets/style.css">
 </head>
 <body>
-    <div class="hero">
-        <div class="container">
-            <h1>Content Aware Pagination</h1>
-            <p class="subtitle">Smartly slice your long documents without cutting the ink.</p>
-            <div class="buttons">
-                <a href="https://github.com/AngadSingh22/Content-Aware-Pagination" class="btn primary"><i class="fab fa-github"></i> View on GitHub</a>
-                <a href="#demo" class="btn secondary">How it Works</a>
+    <div class="container">
+        <header>
+            <h1>Content-Aware Pagination</h1>
+            <p>Intelligent document slicing running purely in your browser.</p>
+        </header>
+
+        <main>
+            <div class="upload-section" id="drop-zone">
+                <input type="file" id="file-upload" accept="image/*" hidden>
+                <label for="file-upload" class="upload-label">
+                    <span class="icon">📁</span>
+                    <span>Click or Drag Image Here</span>
+                </label>
+                <div id="preview-container" class="hidden">
+                    <img id="image-preview" src="" alt="Preview">
+                    <span id="file-name"></span>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div class="features container">
-        <div class="feature-card">
-            <i class="fas fa-magic"></i>
-            <h3>Ink Detection</h3>
-            <p>Analyzes ink density to find natural gaps in handwriting.</p>
-        </div>
-        <div class="feature-card">
-            <i class="fas fa-brain"></i>
-            <h3>Smart DP Algorithm</h3>
-            <p>Uses dynamic programming to find the globally optimal cut path.</p>
-        </div>
-        <div class="feature-card">
-            <i class="fas fa-expand"></i>
-            <h3>High Fidelity</h3>
-            <p>Preserves original resolution with 1:1 pixel mapping.</p>
-        </div>
-    </div>
+            <div class="controls-section">
+                <div class="control-group">
+                    <label>Format</label>
+                    <div class="select-wrapper">
+                        <select id="format-select">
+                            <option value="A4">A4 (Standard)</option>
+                            <option value="A3">A3</option>
+                            <option value="B5">B5</option>
+                            <option value="CUSTOM">Custom Size</option>
+                        </select>
+                    </div>
+                </div>
 
-    <div class="demo-section" id="demo">
-        <div class="container">
-            <h2>Perfect for Note-Takers</h2>
-            <p>Convert your infinite canvas notes into printable A4 PDFs seamlessly.</p>
-            <div class="code-block">
-                <code>pip install content-aware-pagination</code>
-                <code>cap input.png --format A4</code>
+                <div class="control-group hidden" id="custom-size-group">
+                    <div class="input-row">
+                        <div class="input-wrapper">
+                            <label>Width</label>
+                            <input type="number" id="custom-width" placeholder="210" value="210">
+                            <span class="unit">mm</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>Height</label>
+                            <input type="number" id="custom-height" placeholder="297" value="297">
+                            <span class="unit">mm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Cut Mode</label>
+                    <div class="select-wrapper">
+                        <select id="cut-mode-select">
+                            <option value="whitespace">Whitespace (Content-Aware)</option>
+                            <option value="fixed_height_snap">Fixed Height (Snap)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>DPI</label>
+                    <input type="number" id="dpi-input" value="300" min="72" max="600">
+                </div>
+
+                <button id="process-btn" class="primary-btn" disabled>
+                    Process Image
+                </button>
             </div>
-        </div>
+
+            <div id="status-area" class="hidden">
+                <div class="loader"></div>
+                <p id="status-text">Initializing PyScript...</p>
+            </div>
+
+            <div id="results-area" class="hidden">
+                <h2>Results</h2>
+                <div id="download-links"></div>
+            </div>
+        </main>
     </div>
 
-    <footer>
-        <p>Made with &hearts; by Angad Singh</p>
-    </footer>
+    <py-config>
+        packages = ["numpy", "opencv-python", "pillow"]
+        [[fetch]]
+        from = "./assets"
+        files = ["main.py"]
+    </py-config>
+
+    <script src="./assets/ui.js"></script>
+    <py-script src="./assets/main.py"></py-script>
 </body>
 </html>
