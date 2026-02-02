@@ -10,10 +10,6 @@ sys.path.append(src_dir)
 
 from cap.core import find_optimal_cuts_dp
 
-
-
-
-
 def test_boundary_cases():
 
     print("Running boundary tests...", end=" ")

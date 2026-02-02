@@ -18,17 +18,10 @@ def compute_ink_density(image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
         gray = image
-
-
-
     binarized = cv2.adaptiveThreshold(
         gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY_INV, 11, 2
     )
-
-
-
-
     row_sums = np.sum(binarized, axis=1)
     max_val = image.shape[1] * 255.0
     return row_sums / max_val if max_val > 0 else row_sums
@@ -191,9 +184,6 @@ def find_optimal_cuts_dp(ink_profile, target_height,
 
             trans_cost = (w_ink * curr_ink_cost) + (w_height * height_cost)
             total_cost = dp[j] + trans_cost
-
-
-
 
             if total_cost < dp[i] - 1e-9:
                 dp[i] = total_cost

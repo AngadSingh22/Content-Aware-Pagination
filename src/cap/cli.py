@@ -42,11 +42,6 @@ def main(input_path, output, output_format, format, dpi, window_frac, min_gap, c
 
 
     try:
-
-
-
-
-
         img_array = load_image(input_path)
     except Exception as e:
         click.echo(f"Error loading image: {e}", err=True)
@@ -57,25 +52,13 @@ def main(input_path, output, output_format, format, dpi, window_frac, min_gap, c
 
     if format in PAPER_SIZES:
         w_mm, h_mm = PAPER_SIZES[format]
-
-
-
-
-
-
         target_height_px = int(h_mm / 25.4 * dpi)
-
-
-
-
     else:
 
         target_height_px = int(297 / 25.4 * dpi)
 
     click.echo(f"Image Size: {width}x{height}")
     click.echo(f"Target Page Height: {target_height_px} px (@ {dpi} DPI)")
-
-
     click.echo("Analyzing ink density...")
     ink_profile = compute_ink_density(img_array)
 
@@ -84,8 +67,6 @@ def main(input_path, output, output_format, format, dpi, window_frac, min_gap, c
     render_mode_enum = RenderMode.VARIABLE_SIZE if render_mode == "variable_size" else RenderMode.FIXED_SIZE_WITH_PADDING
 
     click.echo(f"Cut Mode: {cut_mode}, Render Mode: {render_mode}")
-
-
     click.echo("Finding optimal cuts (DP)...")
     cuts = find_optimal_cuts_dp(ink_profile, target_height_px,
                                 window_frac=window_frac,

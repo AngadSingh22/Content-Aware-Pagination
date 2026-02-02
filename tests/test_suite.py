@@ -22,9 +22,6 @@ except ImportError:
     HAS_PYPDF2 = False
 
 
-
-
-
 def assert_invariants(cuts, H):
 
     assert isinstance(cuts, (list, tuple)), "cuts must be a list/tuple"
@@ -48,10 +45,6 @@ def assert_cut_in_any_gap(cut, gap_intervals):
     ok = any(a <= cut <= b for (a, b) in gap_intervals)
     assert ok, f"cut {cut} not inside any expected gap interval {gap_intervals}"
 
-
-
-
-
 def test_standard_case_gap_alignment():
 
     print("  test_standard_case_gap_alignment...", end=" ")
@@ -73,7 +66,6 @@ def test_standard_case_gap_alignment():
     assert_invariants(cuts, H)
     assert_strict_window(cuts, target_height, window_frac)
 
-
     expected_gaps = [gap1, gap2, gap3]
     for cut in cuts[1:-1]:
         if cut < H - target_height:
@@ -87,9 +79,7 @@ def test_dense_case_requires_bridge_like_candidates():
     target_height = 1000
     window_frac = 0.1
 
-
     ink = np.full(H, 0.8, dtype=float)
-
 
     bridge1_center = 980
     bridge2_center = 2020
@@ -120,7 +110,6 @@ def test_smoothing_prefers_wide_band_over_single_row():
 
 
     ink[950] = 0.0
-
 
     wide_band = (1035, 1065)
     ink[wide_band[0]:wide_band[1]] = 0.15
@@ -174,10 +163,6 @@ def test_last_page_behavior():
     assert last_h < target_height * 0.5, f"Expected short tail, got {last_h}"
 
     print("PASS")
-
-
-
-
 
 def test_random_configurations_with_engineered_basins():
 
@@ -285,10 +270,6 @@ def test_whitespace_vs_fixed_height_snap_modes():
 
     print("PASS")
 
-
-
-
-
 def test_fixed_size_padding_produces_exact_dimensions():
 
     if not HAS_PYPDF2:
@@ -301,7 +282,6 @@ def test_fixed_size_padding_produces_exact_dimensions():
     height = 3500
     target_height = 1000
     dpi = 300
-
 
     img_array = np.ones((height, width, 3), dtype=np.uint8) * 255
     for i in range(10, height, 100):
@@ -382,10 +362,6 @@ def test_variable_size_allows_different_heights():
         if os.path.exists(output_path):
             os.remove(output_path)
 
-
-
-
-
 def load_profile_from_image(path):
 
     img = Image.open(path).convert('L')
@@ -447,9 +423,6 @@ def test_acceptance_corpus():
         raise AssertionError(f"{len(failures)} acceptance test failures")
 
     print("PASS")
-
-
-
 
 
 def run_all_tests():
